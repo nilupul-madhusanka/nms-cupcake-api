@@ -1,7 +1,7 @@
 # RESTFul API for Cupcakes ordering & selling company
 ## Node.js with Express.js
 ### Installation
-- Clone
+- Clone the Repo
 ```bash
 git clone https://github.com/nilupul-madhusanka/nms-cupcake-api.git
 ```
