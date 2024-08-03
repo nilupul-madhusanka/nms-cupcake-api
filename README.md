@@ -2,10 +2,10 @@
 ## Node.js with Express.js
 ### Installation
 ```bash
-git clone link
+git clone https://github.com/nilupul-madhusanka/nms-cupcake-api.git
 ```
 ```bash
-cd folder
+cd nms-cupcake-api
 ```
 ```bash
 npm init
