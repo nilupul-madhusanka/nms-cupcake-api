@@ -4,10 +4,157 @@ const port = 3000;
 
 app.use(express.json());
 
-const  cupcakes = [];
-const customers = [];
-const orders = [];
+const  cupcakes = [
+    {
+        "id":1,
+        "type":"Strawberry",
+        "price":250,
+    },
+    {
+        "id":2,
+        "type":"Chocolate",
+        "price":150,
+    },
+    {
+        "id":3,
+        "type":"Nutella",
+        "price":300,
+    },
+    {
+        "id":4,
+        "type":"Salted Caramel",
+        "price":400,
+    },
+    {
+        "id":5,
+        "type":"Lemon",
+        "price":100,
+    },
+    {
+        "id":6,
+        "type":"Coconut",
+        "price":300,
+    }
+];
 
+const customers = [
+    {
+        "id":1,
+	    "customer_id":1,
+        "name":"Kamal",
+        "location":"Galle",
+        "email":"kamal.abc@gmail.com"
+    },
+    {
+        "id":2,
+	    "customer_id":2,
+        "name":"Nimal",
+        "location":"Kurunegala",
+        "email":"nimal.abc@gmail.com"
+    },
+    {
+        "id":3,
+	    "customer_id":3,
+        "name":"Sunil",
+        "location":"Anuradhapura",
+        "email":"sunil.abc@gmail.com"
+    },
+    {
+        "id":4,
+	    "customer_id":4,
+        "name":"Kasun",
+        "location":"Jaffna",
+        "email":"kasun.abc@gmail.com"
+    },
+    {
+        "id":5,
+	    "customer_id":5,
+        "name":"Gayan",
+        "location":"Trinco",
+        "email":"gayan.abc@gmail.com"
+    },
+    {
+        "id":6,
+	    "customer_id":6,
+        "name":"Arun",
+        "location":"Colombo",
+        "email":"arun.abc@gmail.com"
+    }
+];
+const orders = [
+    {
+        "id":1,
+        "customer_id":1,
+        "items":"Strawberry Cupcakes",
+        "amount":10
+    },
+    {
+        "id":2,
+        "customer_id":1,
+        "name":"Chocolate Cupcakes",
+        "amount":20
+    },
+    {
+        "id":3,
+        "customer_id":1,
+        "items":"Nutella Cupcakes",
+        "amount":90
+    },
+    {
+        "id":4,
+        "customer_id":1,
+        "name":"Salted Caramel Cupcakes",
+        "amount":44
+    },
+    {
+        "id":5,
+        "customer_id":3,
+        "items":"Lemon Cupcakes",
+        "amount":55
+    },
+    {
+        "id":6,
+        "customer_id":3,
+        "name":"Coconut Cupcakes",
+        "amount":50
+    },
+    {
+        "id":7,
+        "customer_id":2,
+        "items":"Strawberry Cupcakes",
+        "amount":100
+    },
+    {
+        "id":8,
+        "customer_id":2,
+        "name":"Chocolate Cupcakes",
+        "amount":80
+    },
+    {
+        "id":9,
+        "customer_id":2,
+        "items":"Coconut Cupcakes",
+        "amount":40
+    },
+    {
+        "id":10,
+        "customer_id":5,
+        "name":"Lemon Cupcakes",
+        "amount":80
+    },
+    {
+        "id":11,
+        "customer_id":6,
+        "items":"Salted Caramel Cupcakes",
+        "amount":50
+    },
+    {
+        "id":12,
+        "customer_id":4,
+        "name":"Nutella Cupcakes",
+        "amount":70
+    }
+];
 
 app.get('/', (req, res) => {
     return res.send('Welcome to the ABC Cupcake Ordering API!');
@@ -131,7 +278,12 @@ app.post('/add_customer', (req, res) => {
     const newCustomer =req.body;
     newCustomer.id = getNextId(customers);
     customers.push(newCustomer);
-    res.status(200).json(newCustomer);
+    return res.send({
+        "success":true,
+        "statusCode": 200,
+        "massage": "Customer added Successfully!",
+        "data": newCustomer
+    })
 });
 
 /*   Orders GET   */
@@ -144,33 +296,61 @@ app.get('/orders', (req, res) => {
         "data": orders
     });
 });
-app.get('/orders/:orderId', (req, res) => {
-    const orderId = parseInt(req.params.orderId);
-    const order = orders.find((c) => c.id === orderId);
-    if (order){
-        return res.send({
-            "success":true,
-            "statusCode": 200,
-            "massage": "Order is found for ID " + orderId ,
-            "data": order
-        })
-    } else{
+
+app.get('/orders/:customerId', (req, res) => {
+    const customerId = parseInt(req.params.customerId);
+    const customer = customers.find(c => c.id === customerId);
+
+    if (!customer) {
         return res.send({
             "success":false,
             "statusCode": 404,
-            "massage": "Order is not found for ID " + orderId,
+            "massage": "Order is not found for customer_id " + customerId,
+        })
+    }
+
+    const customerOrders = orders.filter(o => o.customer_id === customerId);
+    
+    if (customerOrders){
+        return res.send({
+            "success":true,
+            "statusCode": 200,
+            "massage": "Order is found for customer_id " + customerId ,
+            "data": customerOrders
         })
     }
 });
+
+app.get('/orders/filter/quantity/:quantity', (req, res) => {
+    const quantity = parseInt(req.params.quantity);
+    const filteredOrders = orders.filter(o => o.amount < quantity);
+    res.json(filteredOrders);
+});
+
 
 /*   Orders POST   */
 
 app.post('/add_order', (req, res) => {
     const newOrder =req.body;
+    const customer = customers.find(c => c.id === newOrder.customer_id);
+    if (!customer) {
+        return res.send({
+            "success":false,
+            "statusCode": 404,
+            "massage": "Customer is not found for the Customer ID ",
+        })
+    }
+
     newOrder.id = getNextId(orders);
     orders.push(newOrder);
-    res.status(200).json(newOrder);
+    return res.send({
+        "success":true,
+        "statusCode": 200,
+        "massage": "Order added Successfully!",
+        "data": newOrder
+    })
 });
+
 
 app.listen(port, () => {
     console.log(`App listening on port ${port}...`);
