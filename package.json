@@ -1,5 +1,5 @@
 {
-  "name": "vercel-node-api",
+  "name": "nms-vercel-node-api",
   "version": "1.0.0",
   "description": "A simple Node API to deploy on Vercel",
   "main": "api/index.js",
