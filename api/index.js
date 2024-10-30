@@ -67,6 +67,24 @@ app.get('/api/customers/:customerId', (req, res) => {
         : res.status(404).json({ success: false, message: 'Customer not found' });
 });
 
+// Validation schema for customer data
+const customerSchema = Joi.object({
+    customer_id: Joi.number().integer().required(),
+    name: Joi.string().min(3).required(),
+    location: Joi.string().min(3).required(),
+    email: Joi.string().email().required()
+});
+
+// POST route to add a new customer
+app.post('/api/add_customer', (req, res) => {
+    const { error } = customerSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const newCustomer = { id: getNextId(customers), ...req.body };
+    customers.push(newCustomer);
+    res.status(201).json({ success: true, message: "Customer added successfully", data: newCustomer });
+});
+
 // Order routes
 app.get('/api/orders', (req, res) => res.json({ success: true, data: orders }));
 
@@ -75,6 +93,24 @@ app.get('/api/orders/:customerId', (req, res) => {
     return customerOrders.length
         ? res.json({ success: true, data: customerOrders })
         : res.status(404).json({ success: false, message: 'No orders found for this customer' });
+});
+
+// Validation schema for order data
+const orderSchema = Joi.object({
+    customer_id: Joi.number().integer().required(),
+    cupcake_id: Joi.number().integer().required(),
+    amount: Joi.number().positive().integer().required(),
+    total_price: Joi.number().positive().required()
+});
+
+// POST route to add a new order
+app.post('/api/add_order', (req, res) => {
+    const { error } = orderSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
+
+    const newOrder = { id: getNextId(orders), ...req.body };
+    orders.push(newOrder);
+    res.status(201).json({ success: true, message: "Order added successfully", data: newOrder });
 });
 
 module.exports = app;
